@@ -14,7 +14,7 @@ service KeyValue {
   message Key {
     string key = 1;
   }
-  
+
   message Pair {
     string key = 1;
     string value = 2;

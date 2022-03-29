@@ -1,15 +1,14 @@
 version: "3.9"
 services:
-  web:
+  app:
     build: .
     ports:
-      - "8000:5000"
-  mongodb:
-    image: mongo:5.0
-    ports:
-      - 27017:27017
-    volumes:
-      - ~/apps/mongo:/data/db
+      - "8000:5001"
+  postgres:
+    image: postgres
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=citizix
-      - MONGO_INITDB_ROOT_PASSWORD=S3cret
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "5432:5432"
