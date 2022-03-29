@@ -1,0 +1,29 @@
+syntax = "proto3";
+package service;
+
+option go_package = "github.com/adntgv/kv-storage-service/gen";
+
+service KeyValue {
+    rpc Create (Pair) returns (Reply) {}
+    rpc Update (Pair) returns (Reply) {}
+    rpc Get (Key) returns (Reply) {}
+    rpc Delete (Key) returns (Reply) {}
+    rpc GetHistory (Key) returns (HistoryReply) {}
+  }
+  
+  message Key {
+    string key = 1;
+  }
+  
+  message Pair {
+    string key = 1;
+    string value = 2;
+  }
+  
+  message Reply {
+    string message = 1;
+  }
+
+  message HistoryReply {
+    string message = 1;
+  }
