@@ -13,11 +13,13 @@ import (
 )
 
 func main() {
-	dsn := "host=postgres user=user password=password dbname=db port=5432 sslmode=disable TimeZone=Asia/Almaty"
+	dsn := "host=localhost user=user password=password dbname=db port=5432 sslmode=disable TimeZone=Asia/Almaty"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to open connection: %v", err)
 	}
+
+	db.AutoMigrate(&pb.Pair{})
 
 	port := getEnv("port", "5001")
 

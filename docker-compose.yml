@@ -3,10 +3,9 @@ services:
   app:
     build: .
     ports:
-      - "8000:5001"
+      - "50001:5001"
     depends_on:
       - postgres
-      
   postgres:
     image: postgres
     environment:

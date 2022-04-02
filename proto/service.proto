@@ -21,9 +21,17 @@ service KeyValue {
   }
   
   message Reply {
-    string message = 1;
+    oneof response {
+      string message = 1;
+      Pair pair = 2;
+    }
+  }
+
+  message Event {
+    string event = 1;
+    map<string, string> data  = 2;
   }
 
   message HistoryReply {
-    string message = 1;
+    repeated Event events = 1;
   }

@@ -9,4 +9,5 @@ generate:
     ${SRC_DIR}/service.proto
 
 build:
-	go build ./cmd/server/ 
+	go build -o ./bin/server ./cmd/server/ 
+	go build -o ./bin/client ./cmd/client/
