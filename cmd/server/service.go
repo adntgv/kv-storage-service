@@ -42,6 +42,11 @@ func (pair *Pair) toPair() *pb.Pair {
 	}
 }
 
+/*
+
+If a user tries to create an answer that already exists -
+the request should fail and an adequate message or code should be returned.
+*/
 func (s *server) Create(ctx context.Context, in *pb.Pair) (*pb.Reply, error) {
 	if result := s.db.First(new(Pair)).Where("key", in.Key); result.Error == nil {
 		return nil, status.Errorf(codes.AlreadyExists, "already exists")
@@ -71,6 +76,14 @@ func success() *pb.Reply {
 	return &pb.Reply{Response: &pb.Reply_Message{Message: "success"}}
 }
 
+/*
+
+If a user saves the same key multiple times (using update),
+every answer should be saved. When retrieving an answer,
+it should return the latest answer.
+
+it is not possible to update a deleted key.
+*/
 func (s *server) Update(ctx context.Context, in *pb.Pair) (*pb.Reply, error) {
 	if result := s.db.First(new(Pair)).Where("key", in.Key); result.Error != nil {
 		if result.Error != gorm.ErrRecordNotFound {
@@ -90,6 +103,13 @@ func (s *server) Update(ctx context.Context, in *pb.Pair) (*pb.Reply, error) {
 	return success(), nil
 }
 
+/*
+
+// returns the latest answer for the given key
+
+If an answer doesn't exist or has been deleted,
+an adequate message or code should be returned.
+*/
 func (s *server) Get(ctx context.Context, in *pb.Key) (*pb.Reply, error) {
 	pair := new(Pair)
 	if result := s.db.Last(pair).Where("key", in.Key); result.Error != nil {
@@ -111,6 +131,12 @@ func (s *server) Delete(ctx context.Context, in *pb.Key) (*pb.Reply, error) {
 	return success(), nil
 }
 
+/*
+//returns an array of events in chronological order
+
+When returning history, only mutating events (create, update, delete) should be returned.
+The "get" events should not be recorded.
+*/
 func (s *server) GetHistory(ctx context.Context, in *pb.Key) (*pb.HistoryReply, error) {
 	events := make([]*Event, 0)
 	if result := s.db.Find(&events).Where("key", in.Key); result.Error != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -29,37 +30,51 @@ func main() {
 	defer conn.Close()
 	c := pb.NewKeyValueClient(conn)
 
-	// Contact the server and print out its response.
+	for i, f := range []func(pb.KeyValueClient) error{
+		create,
+		createExisting,
+		update,
+		updateAfterDelete,
+		getDeleted,
+		history,
+	} {
+		if err := f(c); err != nil {
+			log.Fatalf("function %v did not pass: %v", i, err)
+		}
+	}
+}
+
+func create(c pb.KeyValueClient) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	r, err := c.Clear(ctx, &pb.Key{})
 	if err != nil {
-		log.Fatalf("could not create: %v", err)
+		return fmt.Errorf("could not create: %v", err)
 	}
 	log.Printf("Answer: %s", r.GetMessage())
 
 	r, err = c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
 	if err != nil {
-		log.Fatalf("could not create: %v", err)
+		return fmt.Errorf("could not create: %v", err)
 	}
 	log.Printf("Answer: %s", r.GetMessage())
 
-	r, err = c.Update(ctx, &pb.Pair{Key: "name", Value: "Jim"})
-	if err != nil {
-		log.Fatalf("could not create: %v", err)
-	}
-	log.Printf("Answer: %s", r.GetMessage())
+	return nil
+}
 
-	r, err = c.Get(ctx, &pb.Key{Key: "name"})
-	if err != nil {
-		log.Fatalf("could not create: %v", err)
-	}
-	log.Printf("Answer: %v", r.String())
-
-	nr, err := c.GetHistory(ctx, &pb.Key{Key: "name"})
-	if err != nil {
-		log.Fatalf("could not create: %v", err)
-	}
-	log.Printf("Answer: %v", nr.String())
+func createExisting(c pb.KeyValueClient) error {
+	return fmt.Errorf("unimplemented")
+}
+func update(c pb.KeyValueClient) error {
+	return fmt.Errorf("unimplemented")
+}
+func updateAfterDelete(c pb.KeyValueClient) error {
+	return fmt.Errorf("unimplemented")
+}
+func getDeleted(c pb.KeyValueClient) error {
+	return fmt.Errorf("unimplemented")
+}
+func history(c pb.KeyValueClient) error {
+	return fmt.Errorf("unimplemented")
 }
