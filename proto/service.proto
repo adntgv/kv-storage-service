@@ -9,6 +9,7 @@ service KeyValue {
     rpc Get (Key) returns (Reply) {}
     rpc Delete (Key) returns (Reply) {}
     rpc GetHistory (Key) returns (HistoryReply) {}
+    rpc Clear (Key) returns (Reply) {}
   }
   
   message Key {
@@ -29,7 +30,7 @@ service KeyValue {
 
   message Event {
     string event = 1;
-    map<string, string> data  = 2;
+    Pair data  = 2;
   }
 
   message HistoryReply {

@@ -32,7 +32,20 @@ func main() {
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
+
+	r, err := c.Clear(ctx, &pb.Key{})
+	if err != nil {
+		log.Fatalf("could not create: %v", err)
+	}
+	log.Printf("Answer: %s", r.GetMessage())
+
+	r, err = c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
+	if err != nil {
+		log.Fatalf("could not create: %v", err)
+	}
+	log.Printf("Answer: %s", r.GetMessage())
+
+	r, err = c.Update(ctx, &pb.Pair{Key: "name", Value: "Jim"})
 	if err != nil {
 		log.Fatalf("could not create: %v", err)
 	}
@@ -43,4 +56,10 @@ func main() {
 		log.Fatalf("could not create: %v", err)
 	}
 	log.Printf("Answer: %v", r.String())
+
+	nr, err := c.GetHistory(ctx, &pb.Key{Key: "name"})
+	if err != nil {
+		log.Fatalf("could not create: %v", err)
+	}
+	log.Printf("Answer: %v", nr.String())
 }

@@ -19,7 +19,7 @@ func main() {
 		log.Fatalf("failed to open connection: %v", err)
 	}
 
-	db.AutoMigrate(&pb.Pair{})
+	db.AutoMigrate(&Pair{}, &Event{})
 
 	port := getEnv("port", "5001")
 

@@ -23,6 +23,7 @@ type KeyValueClient interface {
 	Get(ctx context.Context, in *Key, opts ...grpc.CallOption) (*Reply, error)
 	Delete(ctx context.Context, in *Key, opts ...grpc.CallOption) (*Reply, error)
 	GetHistory(ctx context.Context, in *Key, opts ...grpc.CallOption) (*HistoryReply, error)
+	Clear(ctx context.Context, in *Key, opts ...grpc.CallOption) (*Reply, error)
 }
 
 type keyValueClient struct {
@@ -78,6 +79,15 @@ func (c *keyValueClient) GetHistory(ctx context.Context, in *Key, opts ...grpc.C
 	return out, nil
 }
 
+func (c *keyValueClient) Clear(ctx context.Context, in *Key, opts ...grpc.CallOption) (*Reply, error) {
+	out := new(Reply)
+	err := c.cc.Invoke(ctx, "/service.KeyValue/Clear", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KeyValueServer is the server API for KeyValue service.
 // All implementations must embed UnimplementedKeyValueServer
 // for forward compatibility
@@ -87,6 +97,7 @@ type KeyValueServer interface {
 	Get(context.Context, *Key) (*Reply, error)
 	Delete(context.Context, *Key) (*Reply, error)
 	GetHistory(context.Context, *Key) (*HistoryReply, error)
+	Clear(context.Context, *Key) (*Reply, error)
 	mustEmbedUnimplementedKeyValueServer()
 }
 
@@ -108,6 +119,9 @@ func (UnimplementedKeyValueServer) Delete(context.Context, *Key) (*Reply, error)
 }
 func (UnimplementedKeyValueServer) GetHistory(context.Context, *Key) (*HistoryReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistory not implemented")
+}
+func (UnimplementedKeyValueServer) Clear(context.Context, *Key) (*Reply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Clear not implemented")
 }
 func (UnimplementedKeyValueServer) mustEmbedUnimplementedKeyValueServer() {}
 
@@ -212,6 +226,24 @@ func _KeyValue_GetHistory_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KeyValue_Clear_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Key)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KeyValueServer).Clear(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.KeyValue/Clear",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KeyValueServer).Clear(ctx, req.(*Key))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KeyValue_ServiceDesc is the grpc.ServiceDesc for KeyValue service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -238,6 +270,10 @@ var KeyValue_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetHistory",
 			Handler:    _KeyValue_GetHistory_Handler,
+		},
+		{
+			MethodName: "Clear",
+			Handler:    _KeyValue_Clear_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
