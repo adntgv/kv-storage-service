@@ -21,11 +21,11 @@ Possible cmds:
 - getHistory -key=[]  
 - clear (clear tables)
 
-How would you support multiple users?
-- add user.id as foreign key
-How would you support answers with types other than string?
-- use interfaces and maps
-What are the main bottlenecks of your solution?
-- single connection to DB, without pool
-How would you scale the service to cope with thousands of requests?
-- multiple instances with load balancer or queues
+- How would you support multiple users?
+- - add user.id as foreign key
+- How would you support answers with types other than string?
+- - use interfaces and maps
+- What are the main bottlenecks of your solution?
+- - single connection to DB, without pool
+- How would you scale the service to cope with thousands of requests?
+- - multiple instances with load balancer or queues
