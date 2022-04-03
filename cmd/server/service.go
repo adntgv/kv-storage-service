@@ -85,7 +85,7 @@ it should return the latest answer.
 it is not possible to update a deleted key.
 */
 func (s *server) Update(ctx context.Context, in *pb.Pair) (*pb.Reply, error) {
-	if result := s.db.First(new(Pair)).Where("key", in.Key); result.Error != nil {
+	if result := s.db.Where("key", in.Key).First(new(Pair)); result.Error != nil {
 		if result.Error != gorm.ErrRecordNotFound {
 			return nil, status.Errorf(codes.Internal, result.Error.Error())
 		}
@@ -121,7 +121,7 @@ func (s *server) Get(ctx context.Context, in *pb.Key) (*pb.Reply, error) {
 
 func (s *server) Delete(ctx context.Context, in *pb.Key) (*pb.Reply, error) {
 	pair := new(Pair)
-	if result := s.db.Delete(pair).Where("key", in.Key); result.Error != nil {
+	if result := s.db.Where("key", in.Key).Delete(pair); result.Error != nil {
 		return nil, status.Errorf(codes.InvalidArgument, result.Error.Error())
 	}
 
@@ -147,10 +147,12 @@ func (s *server) GetHistory(ctx context.Context, in *pb.Key) (*pb.HistoryReply, 
 
 	for i := 0; i < len(events); i++ {
 		historyEvents[i] = new(pb.Event)
-		historyEvents[i].Data = make(map[string]string)
 
 		historyEvents[i].Event = events[i].Event
-		historyEvents[i].Data[events[i].Key] = events[i].Value
+		historyEvents[i].Data = &pb.Pair{
+			Key:   events[i].Key,
+			Value: events[i].Value,
+		}
 	}
 
 	return &pb.HistoryReply{Events: historyEvents}, nil

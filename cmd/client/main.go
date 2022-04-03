@@ -31,9 +31,7 @@ func main() {
 	c := pb.NewKeyValueClient(conn)
 
 	for i, f := range []func(pb.KeyValueClient) error{
-		create,
 		createExisting,
-		update,
 		updateAfterDelete,
 		getDeleted,
 		history,
@@ -44,7 +42,8 @@ func main() {
 	}
 }
 
-func create(c pb.KeyValueClient) error {
+func createExisting(c pb.KeyValueClient) error {
+	log.Println("Testing double creation")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
@@ -54,27 +53,60 @@ func create(c pb.KeyValueClient) error {
 	}
 	log.Printf("Answer: %s", r.GetMessage())
 
+	_, err = c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
+	if err != nil {
+		return fmt.Errorf("could not create: %v", err)
+	}
+
+	_, err = c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
+	if err == nil {
+		return fmt.Errorf("should not be able to create: %v", err)
+	}
+	log.Printf("Answer: %s", err.Error())
+
+	return nil
+}
+
+func updateAfterDelete(c pb.KeyValueClient) error {
+	log.Println("Testing update deleted")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	log.Println("clear db")
+	r, err := c.Clear(ctx, &pb.Key{})
+	if err != nil {
+		return fmt.Errorf("could not create: %v", err)
+	}
+	log.Printf("Answer: %s", r.GetMessage())
+
+	log.Println("create pair")
 	r, err = c.Create(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
 	if err != nil {
 		return fmt.Errorf("could not create: %v", err)
 	}
 	log.Printf("Answer: %s", r.GetMessage())
 
+	log.Println("delete pair")
+	r, err = c.Delete(ctx, &pb.Key{Key: "name"})
+	if err != nil {
+		return fmt.Errorf("could not delete: %v", err)
+	}
+	log.Printf("Answer: %s", r.GetMessage())
+
+	log.Println("update deleted")
+	_, err = c.Update(ctx, &pb.Pair{Key: "name", Value: "Aidyn"})
+	if err == nil {
+		return fmt.Errorf("should not be able to update: %v", err)
+	}
+	log.Printf("Answer: %s", err.Error())
+
 	return nil
 }
 
-func createExisting(c pb.KeyValueClient) error {
-	return fmt.Errorf("unimplemented")
-}
-func update(c pb.KeyValueClient) error {
-	return fmt.Errorf("unimplemented")
-}
-func updateAfterDelete(c pb.KeyValueClient) error {
-	return fmt.Errorf("unimplemented")
-}
 func getDeleted(c pb.KeyValueClient) error {
 	return fmt.Errorf("unimplemented")
 }
+
 func history(c pb.KeyValueClient) error {
 	return fmt.Errorf("unimplemented")
 }
